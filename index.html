@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список товаров</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .selected-card {
+            border: 2px solid rgb(0, 110, 255);
+        }
+        .main {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        .block {
+            padding: 0 11vw;
+            text-align: center;
+            background-color: white;
+        }
+        .block_header {
+            padding-top: 40px;
+        }
+
+        .block_header_logo {
+            display: inline-block;
+            vertical-align: bottom;
+            width: 64px;
+            height: 64px;
+        }
+
+        .block_header_title {
+            font-size: 50px;
+            font-weight: 700;
+            vertical-align: super;
+            display: inline-block;
+            margin: 0;
+            margin-left: 12px;
+            letter-spacing: -2px;
+        }
+        .block_qr {
+            margin-top: 20px;
+            height: 300px;
+            width: 300px;
+            position: relative;
+        }
+        .block_text {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 27px;
+            line-height: 35px;
+        }
+        .logo{
+            width: 75px;
+            height: 75px;
+            display: flex;
+            background-color: #fff;
+            justify-content: center;
+            overflow: hidden;
+            position: absolute;
+            z-index: 999;
+
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h1>Список товаров</h1>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="https://via.placeholder.com/300" class="card-img-top" alt="Товар 1">
+                    <div class="card-body">
+                        <h5 class="card-title">Товар 1</h5>
+                        <p class="card-text">Цена: 10 ₸</p>
+                        <button class="btn btn-primary">Выбрать</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="https://via.placeholder.com/300" class="card-img-top" alt="Товар 1">
+                    <div class="card-body">
+                        <h5 class="card-title">Товар 2</h5>
+                        <p class="card-text">Цена: 20 ₸</p>
+                        <button class="btn btn-primary btn-1">Выбрать</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4" id="card-1" >
+                <div class="card" style="display: flex; justify-content: center; align-items: center;">
+                    <div class="card-body">
+                        <div class="block_header">
+                            <img src="https://kaspi.kz/pay/img/qr_block_logo.svg" class="block_header_logo" alt="">
+                            <p class="block_header_title">Kaspi QR</p>
+                        </div>
+                        <div class="block_text" data-locale-text="text">Сканируйте и платите</div>
+                    </div>
+                    <div class="block_qr" id="qrcode" style="display: flex; justify-content: center; align-items: center;">
+                        <div class="logo"></div>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+        
+
+        
+          
+    </div>
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const cards = document.querySelectorAll('.card');
+            const qrBlock = document.getElementById('qrcode');
+            // const logo = document.getElementsByClassName('logo')
+
+            
+            qrBlock.style.display = 'none';
+
+            
+            async function generateQRCode(price) {
+                try {
+                    const url = `https://nscomp.kz/neword/42/${price}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    const id = data.id;
+                    const qrCodeUrl = `https://kaspi.kz/pay/NSCompany?service_id=6692&10661=${id}`;
+
+                    
+                    qrBlock.innerHTML = '';
+
+                    const qrcode = new QRCode(qrBlock, {
+                        text: qrCodeUrl,
+                        width: 300,
+                        height: 300,
+                        colorDark: '#000',
+                        colorLight: '#fff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    const logo = document.createElement('div');
+                    logo.className = 'logo';
+                    logo.innerHTML = '<img src="logo.png" alt="">';
+
+                    // Помещаем логотип в блок с QR-кодом
+                    qrBlock.appendChild(logo);
+                    
+
+                } catch (error) {
+                    console.error("Ошибка запроса:", error);
+                }
+            }
+
+            cards.forEach(card => {
+                card.addEventListener("click", function() {
+                    cards.forEach(card => {
+                        card.classList.remove("selected-card");
+                    });
+                    this.classList.add("selected-card");
+                });
+
+                const selectButton = card.querySelector(".btn-primary");
+                selectButton.addEventListener("click", function(event) {
+                    event.stopPropagation();
+                    const priceText = card.querySelector(".card-text").textContent;
+                    const price = parseFloat(priceText.replace("Цена: ", "").replace(" ₸", ""));
+
+                    
+                    qrBlock.style.display = 'flex';
+                    generateQRCode(price);
+                });
+            });
+        });
+
+
+    </script>
+
+
+
+
+
+
+
+    
+    <!-- <script>
+        document.addEventListener("DOMContentLoaded", function() {
+        const cards = document.querySelectorAll(".card");
+
+        cards.forEach(card => {
+            card.addEventListener("click", function() {
+                cards.forEach(card => {
+                    card.classList.remove("selected-card");
+                });
+                this.classList.add("selected-card");
+            });
+
+            const selectButton = card.querySelector(".btn-primary");
+            selectButton.addEventListener("click", function(event) {
+                const qrBlock = document.querySelector(".card-1");
+
+                selectButton.addEventListener("click", function() {
+                    qrBlock.style.display = "flex";
+                });
+                event.stopPropagation(); 
+                const priceText = card.querySelector(".card-text").textContent;
+                const price = parseFloat(priceText.replace("Цена: ", "").replace(" ₸", ""));
+
+                
+                const url = `https://nscomp.kz/neword/42/${price}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        // console.log(data);
+                        const id = data.id;
+                        const qrCodeUrl = `https://kaspi.kz/pay/NSCompany?service_id=6692&10661=${id}`;
+                        // console.log("Ссылка для генерации QR-кода:", qrCodeUrl);
+
+                        const qrcode = new QRCode(document.getElementById('qrcode'), {
+                            text: qrCodeUrl,
+                            width: 300,
+                            height: 300,
+                            colorDark : '#000',
+                            colorLight : '#fff',
+                            correctLevel : QRCode.CorrectLevel.H
+                        });
+                       
+
+                    })
+                    .catch(error => {
+                        console.error("Ошибка запроса:", error);
+                });
+            });
+        });
+    });
+
+
+
+        
+
+
+    </script> -->
+</body>
+</html>
